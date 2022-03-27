@@ -33,23 +33,26 @@ class CommandHandler {
     constructor() {
         this.wordleGameActive = false
         this.wordleGame = null
+        this.commands = {
+            "help": (msg, args) => help(msg),
+            "ping": (msg, args) => msg.reply("Pong!"),
+            "wordle": (msg, args) => {
+                this.wordleGame = startWordleGame(msg, args)
+                this.wordleGameActive = true
+            },
+            "red": (msg, args) => {
+                args.shift()
+                msg.channel.send("```diff\n" + "- " + args.join(" ") + "\n```")
+            }
+        }
     }
     
     handle_commands(args, msg) {
-        switch(args[0].toLowerCase()) {
-            case "help":
-                help(msg)
-                break;
-            case "ping":
-                msg.reply("Pong!")
-                break;
-            case "wordle":
-                this.wordleGame = startWordleGame(msg, args)
-                this.wordleGameActive = true
-                break;
-            default:
-                msg.reply("This command doesn't exist.")
-                break;
+        const command = args[0].toLowerCase()
+        if(this.commands[command]) {
+            this.commands[command](msg, args)
+        } else {
+            msg.reply("This command doesn't exist.")
         }
     }
 
