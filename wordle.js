@@ -2129,7 +2129,6 @@ const answers = [
     "truth",
     "tryst",
     "tubal",
-    "tube",
     "tulip",
     "tulle",
     "tumor",
@@ -15435,9 +15434,10 @@ class WordleGame {
         this.guessCount = 1
         this.secret = this.getSecret()
         this.big = settings?.big ?? false
-        this.winLose = null
+        // this.winLose = null
         this.maxGuesses = parseInt(settings?.maxGuesses ?? 6)
         this.wordLength = parseInt(settings?.wordLength ?? 5)
+        this.status = null
     }
 
     getSecret() {
@@ -15485,9 +15485,11 @@ class WordleGame {
         this.processedWords += letters + "\n"
         if(greens === this.wordLength) { 
             this.done = true
-            this.setWinLose("win")
+            // this.setWinLose("win")
+            this.status = "win"
         } else if(this.done) {
-            this.setWinLose("lose")
+            // this.setWinLose("lose")
+            this.status = "lose"
         }
         return this.display()
     }
@@ -15508,13 +15510,13 @@ class WordleGame {
         return res
     }
 
-    setWinLose(winLose) {
-        if(winLose === "win") { 
-            this.winLose = "\n᲼᲼᲼᲼᲼᲼᲼᲼:green_square:You Win!:green_square:"
-        } else if(winLose === "lose") {
-            this.winLose = "\n᲼᲼᲼᲼᲼᲼᲼᲼:red_square:You Lose!:red_square:" + "\n᲼᲼᲼᲼᲼The Word Was: " + this.secret
-        }
-    }
+    // setWinLose(winLose) {
+    //     if(winLose === "win") { 
+    //         this.winLose = "\n᲼᲼᲼᲼᲼᲼᲼᲼:green_square:You Win!:green_square:"
+    //     } else if(winLose === "lose") {
+    //         this.winLose = "\n᲼᲼᲼᲼᲼᲼᲼᲼:red_square:You Lose!:red_square:" + "\n᲼᲼᲼᲼᲼The Word Was: " + this.secret
+    //     }
+    // }
 
     getKeyboard() {
         const row1 = ['Q','W','E','R','T','Y','U','I','O','P']
@@ -15532,6 +15534,7 @@ class WordleGame {
         for(let letter of row3) {
             keyboard += this.get_keyboard_key_color(letter)
         }
+        keyboard += "\n ᲼᲼"
         return keyboard
     }
 
