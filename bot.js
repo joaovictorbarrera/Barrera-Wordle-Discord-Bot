@@ -7,7 +7,9 @@ client.on('messageCreate', (msg) => {
     // message is from an user
     if (msg.author.bot) return;
     // if there's a wordle game active, any message is a game entry
-    if (Handler.wordleGameActive) {Handler.playWordleGame(msg); return}
+    if (Handler.wordleGameActive && Handler.wordleChannel === msg.channel.id) {
+        Handler.playWordleGame(msg); return
+    }
     // no prefix or msg equals prefix (no args)
     if (msg.content.indexOf(process.env.PREFIX) !== 0) return;
     if (msg.content === process.env.PREFIX) return;

@@ -43,6 +43,7 @@ ELSE:
 // actual handler class
 class CommandHandler {
     constructor() {
+        this.wordleChannel = null
         this.wordleGameActive = false
         this.wordleGames = null
         this.commands = {
@@ -50,6 +51,7 @@ class CommandHandler {
             "ping": (msg, args) => msg.reply("Pong!"),
             "wordle": (msg, args) => {
                 this.wordleGames = startWordleGame(msg, args)
+                this.wordleChannel = msg.channel.id
                 this.wordleGameActive = true
             },
             "red": (msg, args) => {
