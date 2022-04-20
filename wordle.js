@@ -15423,6 +15423,14 @@ const coloredLetters = {
     }
 }
 
+function countLetterInWord(word, letter) {
+    count = 0;
+    for (wordLetter of word) {
+        if (wordLetter === letter) count++
+    }
+    return count
+}
+
 class WordleGame {
     constructor(settings) {
         this.past_greens = []
@@ -15433,8 +15441,8 @@ class WordleGame {
         this.done = false
         this.guessCount = 1
         this.secret = this.getSecret()
+        // this.secret = "HURRY"
         this.big = settings?.big ?? false
-        // this.winLose = null
         this.maxGuesses = parseInt(settings?.maxGuesses ?? 6)
         this.wordLength = parseInt(settings?.wordLength ?? 5)
         this.status = null
@@ -15454,7 +15462,7 @@ class WordleGame {
         this.guesses.push(guess)
         
         if (this.guessCount >= this.maxGuesses + 1) this.done = true
-        
+         
         return this.process(guess.toUpperCase())
     }
 
@@ -15467,20 +15475,44 @@ class WordleGame {
         let letters = ""
         if(!this.big) letters = "᲼᲼᲼᲼᲼᲼᲼"
         guess.split("").forEach((letter, index) => {
+            
             if(this.secret[index] === letter) {
                 // green
                 letters += `${coloredLetters[letter].green} `
                 this.past_greens.push(letter)
                 greens++
-            } else if(this.secret.includes(letter)) {
-                // yellow
-                letters += `${coloredLetters[letter].yellow} `
-                this.past_yellows.push(letter)
-            } else {
+            }
+            else if (!this.secret.includes(letter)) {
                 // gray
                 letters += `${coloredLetters[letter].gray} `
                 this.past_grays.push(letter)
             }
+            else if (countLetterInWord(guess, letter) > countLetterInWord(this.secret, letter)) {
+                // BRASS
+                // SASSY
+                let altIndex = 0
+                let count = 0
+                while (altIndex < this.wordLength) {
+                    if ((guess[altIndex] === letter && altIndex < index) || (this.secret[altIndex] === guess[altIndex] && guess[altIndex] === letter && altIndex > index) ) {
+                        count++
+                    }  
+                    altIndex++
+                }
+                if (count >= countLetterInWord(this.secret, letter)) {
+                    // gray
+                    letters += `${coloredLetters[letter].gray} `
+                    this.past_grays.push(letter)
+                } else {
+                    // yellow
+                    letters += `${coloredLetters[letter].yellow} `
+                    this.past_yellows.push(letter)
+                }
+            } else {
+                // yellow
+                letters += `${coloredLetters[letter].yellow} `
+                this.past_yellows.push(letter)
+            }
+            
         })
         this.processedWords += letters + "\n"
         if(greens === this.wordLength) { 
