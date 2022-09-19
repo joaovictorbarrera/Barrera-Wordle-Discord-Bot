@@ -1,1 +1,1 @@
-worker: node bot.js
+web: cd server && npm run start
