@@ -34,7 +34,7 @@ function handle_commands(msg) {
 }
 
 function handleWordleGameActive(msg) {
-    if (Object.keys(wordleGameInstances).includes(msg.channel.id)) {
+    if (wordleGameInstances.hasOwnProperty(msg.channel.id)) {
         playWordleGame(msg)
         return true
     }
