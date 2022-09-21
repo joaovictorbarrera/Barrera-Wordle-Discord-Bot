@@ -15441,7 +15441,6 @@ class WordleGame {
         this.done = false
         this.guessCount = 1
         this.secret = this.getSecret()
-        // this.secret = "HURRY"
         this.big = settings?.big ?? false
         this.maxGuesses = parseInt(settings?.maxGuesses ?? 6)
         this.wordLength = parseInt(settings?.wordLength ?? 5)
@@ -15453,17 +15452,17 @@ class WordleGame {
     }
 
     makeGuess(guess) {
-        if (this.done) return "Game ended"
-        if (guess.length !== 5) return "Must be exactly 5 letters!"
-        if (!acceptable.includes(guess)) return "Unnaceptable word!"
-        if (this.guesses.includes(guess)) return "Guessed already!"
+        if (this.done) return {fail: true, content:"Game ended"}
+        if (guess.length !== 5) return {fail: true, content:"Must be exactly 5 letters!"}
+        if (!acceptable.includes(guess)) return {fail: true, content:"Unnaceptable word!"}
+        if (this.guesses.includes(guess)) return {fail: true, content:"Guessed already!"}
 
         this.guessCount++
         this.guesses.push(guess)
         
         if (this.guessCount >= this.maxGuesses + 1) this.done = true
          
-        return this.process(guess.toUpperCase())
+        return {fail: false, content: this.process(guess.toUpperCase())}
     }
 
     next() {
@@ -15517,10 +15516,8 @@ class WordleGame {
         this.processedWords += letters + "\n"
         if(greens === this.wordLength) { 
             this.done = true
-            // this.setWinLose("win")
             this.status = "win"
         } else if(this.done) {
-            // this.setWinLose("lose")
             this.status = "lose"
         }
         return this.display()
@@ -15541,14 +15538,6 @@ class WordleGame {
         
         return res
     }
-
-    // setWinLose(winLose) {
-    //     if(winLose === "win") { 
-    //         this.winLose = "\n᲼᲼᲼᲼᲼᲼᲼᲼:green_square:You Win!:green_square:"
-    //     } else if(winLose === "lose") {
-    //         this.winLose = "\n᲼᲼᲼᲼᲼᲼᲼᲼:red_square:You Lose!:red_square:" + "\n᲼᲼᲼᲼᲼The Word Was: " + this.secret
-    //     }
-    // }
 
     getKeyboard() {
         const row1 = ['Q','W','E','R','T','Y','U','I','O','P']

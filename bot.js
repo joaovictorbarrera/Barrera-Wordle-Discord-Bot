@@ -4,10 +4,7 @@ const handle_commands = require('./commandHandler.js')
 const client = new Discord.Client({ intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MEMBERS"] })
 
 client.on('messageCreate', (msg) => {
-    // message is from an user
     if (msg.author.bot) return;
-
-    // handles commands
     handle_commands(msg)
 })
 

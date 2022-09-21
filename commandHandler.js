@@ -14,8 +14,7 @@ const commands = {
 }
 
 function handle_commands(msg) {
-
-    // if there was a wordle game happening on that channel, return
+    // exit if there was a wordle game happening on that channel
     if (handleWordleGameActive(msg)) return
 
     // no prefix or msg equals prefix (no args)
@@ -25,6 +24,7 @@ function handle_commands(msg) {
     // gets list of args
     const args = msg.content.slice(process.env.PREFIX.length).split(" ")
 
+    // handles commands
     const command = args[0].toLowerCase()
     if(commands[command]) {
         commands[command](msg, args)
@@ -45,14 +45,16 @@ function handleWordleGameActive(msg) {
 function startWordleGame(msg, args) {
     const WordleGame = require("./wordle")
     const wordleGames = []
+    const opt = getOptions(args)
+    // handle quordle
     if(args.some(item => item === "quordle")) {
         for(let i = 0; i < 4; i++) {
-            const opt = getOptions(args)
-            if(!opt.maxGuesses) opt.maxGuesses = 9
-            wordleGames.push(new WordleGame(opt))
+            const quordleOpt = opt
+            if(!quordleOpt.maxGuesses) quordleOpt.maxGuesses = 9
+            wordleGames.push(new WordleGame(quordleOpt))
         }
     } else {
-        wordleGames.push(new WordleGame(getOptions(args)))
+        wordleGames.push(new WordleGame(opt))
     }
     
     msg.channel.send(`Wordle Game Started! Big mode: ${wordleGames[0].big}, maxGuesses: ${wordleGames[0].maxGuesses}`)
@@ -61,6 +63,8 @@ function startWordleGame(msg, args) {
 }
 
 function playWordleGame(msg) {
+
+    // handle forfeit
     if(msg.content === `${process.env.PREFIX}ff`) {
         delete wordleGameInstances[msg.channel.id]
         msg.react("😢")
@@ -68,41 +72,44 @@ function playWordleGame(msg) {
         return;
     }
 
-    let failed = null
+    let failed
     const wordleGames = wordleGameInstances[msg.channel.id]
     wordleGames.forEach(game => {
         const res = game.makeGuess(msg.content)
-        const fail_messages = [
-            "Game ended",
-            "Must be exactly 5 letters!",
-            "Guessed already!",
-            "Unnaceptable word!"
-        ]
-        if(!fail_messages.includes(res)) {
-            msg.channel.send(res)
-            msg.channel.send(game.getKeyboard())
-        } else {
-            failed = res
+
+        if (res.fail) {
+            failed = res.content
+            return
         }
+
+        msg.channel.send(res.content)
+        msg.channel.send(game.getKeyboard())
     })
 
     if(failed && failed !== "Game ended") msg.channel.send(failed)
     
+    // all games finished
     if(wordleGames.every(game => game.done)) {
+        // user won
         if(wordleGames.every(game => game.status === "win")) {
             msg.channel.send("\n᲼᲼᲼᲼᲼᲼᲼᲼:green_square:You Win!:green_square:")
-        } else {
-            if(wordleGames.length === 1) {
-                msg.channel.send("\n᲼᲼᲼᲼᲼᲼᲼᲼:red_square:You Lose!:red_square:" + "\n᲼᲼᲼᲼᲼᲼᲼᲼The Word Was:\n᲼᲼᲼᲼᲼᲼᲼᲼᲼᲼᲼" + wordleGames[0].secret)
-            } else {
-                const secrets = wordleGames.map(game => game.secret)
-                msg.channel.send("\n᲼᲼᲼᲼᲼᲼᲼᲼:red_square:You Lose!:red_square:" + "\n᲼᲼᲼᲼᲼᲼᲼The Words Were:\n᲼᲼᲼" + secrets)
-            }
         }
+        // user lost wordle
+        else if (wordleGames.length === 1) {
+            msg.channel.send("\n᲼᲼᲼᲼᲼᲼᲼᲼:red_square:You Lose!:red_square:" + "\n᲼᲼᲼᲼᲼᲼᲼᲼The Word Was:\n᲼᲼᲼᲼᲼᲼᲼᲼᲼᲼᲼" + wordleGames[0].secret)
+        } 
+        // user lost quordle
+        else {
+            const secrets = wordleGames.map(game => game.secret)
+            msg.channel.send("\n᲼᲼᲼᲼᲼᲼᲼᲼:red_square:You Lose!:red_square:" + "\n᲼᲼᲼᲼᲼᲼᲼The Words Were:\n᲼᲼᲼" + secrets)
+        }
+        
         delete wordleGameInstances[msg.channel.id]
         return;
     }
-    msg.channel.send(wordleGames[0].next())
+
+    // sends guess count message from a game that is not done
+    msg.channel.send(wordleGames.find(game => !game.done).next())
 }
 
 
